@@ -3,16 +3,16 @@
 ## Usage
 
 ### 1. Import the package
-'''
+```python
 from utils import *
 from DL_ClassifierModel import *
 from sklearn.model_selection import train_test_split,StratifiedShuffleSplit,StratifiedKFold,KFold
 from functools import reduce
 SEED = 388014
-'''
+```
 
 ### 2. Load the dataset
-'''
+```python
 totalDS = lncRNA_loc_dataset('../dataset/data.csv', k=3, mode='csv')
 tokenizer = Tokenizer(totalDS.sequences, totalDS.labels, seqMaxLen=8196, useAAC=True, sequences_=totalDS.sequences_)
 tknedLabs = []
@@ -27,10 +27,10 @@ testIdx_ = set(testIdx)
 restIdx = np.array([i for i in range(len(totalDS)) if i not in testIdx_])
 
 totalDS.cache_tokenizedKgpSeqArr(tokenizer, groups=512)
-'''
+```
 
 ### 3. Train the model by 5-fold cross-validation
-'''
+```python
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEED)
 for i,(trainIdx,validIdx) in enumerate(skf.split(restIdx, np.array(tknedLabs)[restIdx])):
     trainIdx,validIdx = restIdx[trainIdx],restIdx[validIdx]
@@ -56,4 +56,4 @@ for i,(trainIdx,validIdx) in enumerate(skf.split(restIdx, np.array(tknedLabs)[re
                 isHigherBetter=True, metrics="MaAUC", report=["LOSS", "AvgF1", 'MiF', 'MaF', "LOSS", "MaAUC", 'MiAUC', 'MiP', 'MaP', 'MiR', 'MaR', "EachAUC", "EachAUPR"], 
                 savePath=f'models/KGPDPLAM_alpha_cv{i}', shuffle=True, dataLoadNumWorkers=0, pinMemory=True, 
                 warmupEpochs=4, doEvalTrain=False, prefetchFactor=2)
-'''
+```

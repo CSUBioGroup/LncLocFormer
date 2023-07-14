@@ -3,7 +3,9 @@ a transformer-based deep learning model for multi-label lncRNA subcellular local
 
 ## Requirements
 numpy==1.22.3
+
 scikit-learn==1.1.1
+
 torch==1.13.1+cu117
 
 ## Usage

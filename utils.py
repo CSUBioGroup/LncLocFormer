@@ -8,8 +8,8 @@ from torch.utils.data import DataLoader,Dataset
 import torch.nn.functional as F
 from itertools import permutations
 from sklearn.feature_extraction.text import CountVectorizer
-from gensim.models import Word2Vec,FastText
-from glove import Glove, Corpus
+# from gensim.models import Word2Vec,FastText
+# from glove import Glove, Corpus
 import logging,pickle
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
@@ -82,54 +82,54 @@ class Tokenizer:
 
         return pContFeat
 
-    def vectorize(self, sequences, method=["skipgram"], embSize=64, window=7, iters=10, batchWords=10000,
-                  workers=8, loadCache=True, suf=""):
-        path = f'cache/{"-".join(method)}_d{embSize*len(method)}_{suf}.pkl'
-        if os.path.exists(path) and loadCache:
-            with open(path, 'rb') as f:
-                self.embedding = pickle.load(f)
-            print('Loaded cache from cache/%s'%path)
-        else:
-            corpus = [i+['[PAD]'] for i in sequences]
-            embeddings = []
-            if 'skipgram' in method:
-                model = Word2Vec(corpus, min_count=0, window=window, vector_size=embSize, workers=workers, sg=1, epochs=iters, batch_words=batchWords)
-                word2vec = np.zeros((self.tknNum, embSize), dtype=np.float32)
-                for i in range(self.tknNum):
-                    if self.id2tkn[i] in model.wv:
-                        word2vec[i] = model.wv[self.id2tkn[i]]
-                    else:
-                        print('word %s not in word2vec.'%self.id2tkn[i])
-                        word2vec[i] =  np.random.random(embSize)
-                embeddings.append(word2vec)
-            if 'glove' in method:
-                gCorpus = Corpus()
-                gCorpus.fit(corpus, window=window)
-                model = Glove(no_components=embSize)
-                model.fit(gCorpus.matrix, epochs=iters, no_threads=workers, verbose=True)
-                model.add_dictionary(gCorpus.dictionary)
-                word2vec = np.zeros((self.tknNum, embSize), dtype=np.float32)
-                for i in range(self.tknNum):
-                    if self.id2tkn[i] in model.dictionary:
-                        word2vec[i] = model.word_vectors[model.dictionary[self.id2tkn[i]]]
-                    else:
-                        print('word %s not in word2vec.'%self.id2tkn[i])
-                        word2vec[i] =  np.random.random(embSize)
-                embeddings.append(word2vec)
-            if 'fasttext' in method:
-                model = FastText(corpus, vector_size=embSize, window=window, min_count=0, epochs=iters, sg=1, workers=workers, batch_words=batchWords)
-                word2vec = np.zeros((self.tknNum, embSize), dtype=np.float32)
-                for i in range(self.tknNum):
-                    if self.id2tkn[i] in model.wv:
-                        word2vec[i] = model.wv[self.id2tkn[i]]
-                    else:
-                        print('word %s not in word2vec.'%self.id2tkn[i])
-                        word2vec[i] =  np.random.random(embSize)
-                embeddings.append(word2vec)
-            self.embedding = np.hstack(embeddings)
+    # def vectorize(self, sequences, method=["skipgram"], embSize=64, window=7, iters=10, batchWords=10000,
+    #               workers=8, loadCache=True, suf=""):
+    #     path = f'cache/{"-".join(method)}_d{embSize*len(method)}_{suf}.pkl'
+    #     if os.path.exists(path) and loadCache:
+    #         with open(path, 'rb') as f:
+    #             self.embedding = pickle.load(f)
+    #         print('Loaded cache from cache/%s'%path)
+    #     else:
+    #         corpus = [i+['[PAD]'] for i in sequences]
+    #         embeddings = []
+    #         if 'skipgram' in method:
+    #             model = Word2Vec(corpus, min_count=0, window=window, vector_size=embSize, workers=workers, sg=1, epochs=iters, batch_words=batchWords)
+    #             word2vec = np.zeros((self.tknNum, embSize), dtype=np.float32)
+    #             for i in range(self.tknNum):
+    #                 if self.id2tkn[i] in model.wv:
+    #                     word2vec[i] = model.wv[self.id2tkn[i]]
+    #                 else:
+    #                     print('word %s not in word2vec.'%self.id2tkn[i])
+    #                     word2vec[i] =  np.random.random(embSize)
+    #             embeddings.append(word2vec)
+    #         if 'glove' in method:
+    #             gCorpus = Corpus()
+    #             gCorpus.fit(corpus, window=window)
+    #             model = Glove(no_components=embSize)
+    #             model.fit(gCorpus.matrix, epochs=iters, no_threads=workers, verbose=True)
+    #             model.add_dictionary(gCorpus.dictionary)
+    #             word2vec = np.zeros((self.tknNum, embSize), dtype=np.float32)
+    #             for i in range(self.tknNum):
+    #                 if self.id2tkn[i] in model.dictionary:
+    #                     word2vec[i] = model.word_vectors[model.dictionary[self.id2tkn[i]]]
+    #                 else:
+    #                     print('word %s not in word2vec.'%self.id2tkn[i])
+    #                     word2vec[i] =  np.random.random(embSize)
+    #             embeddings.append(word2vec)
+    #         if 'fasttext' in method:
+    #             model = FastText(corpus, vector_size=embSize, window=window, min_count=0, epochs=iters, sg=1, workers=workers, batch_words=batchWords)
+    #             word2vec = np.zeros((self.tknNum, embSize), dtype=np.float32)
+    #             for i in range(self.tknNum):
+    #                 if self.id2tkn[i] in model.wv:
+    #                     word2vec[i] = model.wv[self.id2tkn[i]]
+    #                 else:
+    #                     print('word %s not in word2vec.'%self.id2tkn[i])
+    #                     word2vec[i] =  np.random.random(embSize)
+    #             embeddings.append(word2vec)
+    #         self.embedding = np.hstack(embeddings)
 
-            with open(path, 'wb') as f:
-                pickle.dump(self.embedding, f, protocol=4)
+    #         with open(path, 'wb') as f:
+    #             pickle.dump(self.embedding, f, protocol=4)
 
 class lncRNA_loc_dataset(Dataset):
     def __init__(self, dataPath, k=1, mode="csv"):

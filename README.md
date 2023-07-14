@@ -1,5 +1,5 @@
 # LncLocFormer
-
+a transformer-based deep learning model for multi-label lncRNA subcellular localization prediciton by using localization-specific mechanism.
 ## Usage
 
 ### 1. Import the package
